@@ -21,6 +21,7 @@ namespace Clothers.Models
 
         [Required]
         [Column(TypeName = "nvarchar(20)")]
+        [Display(Name = "Size")]
         public ProductSizes Sizes { get; set; }
 
         [Required]

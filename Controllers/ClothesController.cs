@@ -1,14 +1,25 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Clothers.Data;
+using Clothers.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Clothers.Controllers
 {
     public class ClothesController : Controller
     {
-        // GET: ClothesController
-        public ActionResult Index()
+
+        private readonly ApplicationDbContext _context;
+
+        public ClothesController(ApplicationDbContext context)
         {
-            return View();
+            _context = context;
+        }
+
+        // GET: ClothesController
+        public async Task<IActionResult> Index()
+        {
+            return View(await _context.Products.ToListAsync());
         }
 
         // GET: ClothesController/Details/5
@@ -26,16 +37,16 @@ namespace Clothers.Controllers
         // POST: ClothesController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public async Task<IActionResult> Create(Product product)
         {
-            try
+            if (ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
+                _context.Add(product);
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Index");
             }
-            catch
-            {
-                return View();
-            }
+
+            return View(product);
         }
 
         // GET: ClothesController/Edit/5
