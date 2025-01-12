@@ -1,60 +1,88 @@
 ﻿@model IEnumerable<Clothers.Models.Product>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Products";
 }
 
-<h1>Index</h1>
+<h1>Products</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a class="btn btn-primary" asp-action="Create">Create New</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Price)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Quantity)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Sizes)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Description)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Price)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Quantity)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Sizes)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                </td>
-            </tr>
+
+<div class="product-grid">
+    @foreach (var product in Model)
+    {
+        <div class="product-card">
+            <div class="product-image">
+                <!-- Miejsce na zdjęcie (na razie szary kwadrat) -->
+                <div class="placeholder-image"></div>
+            </div>
+            <div class="product-details">
+                <h3>@product.Name</h3>
+                <p>@product.Description</p>
+                <p><strong>Price:</strong> @product.Price.ToString("C")</p>
+                <p><strong>Quantity:</strong> @product.Quantity</p>
+                <p><strong>Size:</strong> @product.Sizes</p>
+                <div class="product-actions">
+                    <a class="btn btn-secondary" asp-action="Details" asp-route-id="@product.Id">Details</a>
+                    <a class="btn btn-warning" asp-action="Edit" asp-route-id="@product.Id">Edit</a>
+                    <a class="btn btn-danger" asp-action="Delete" asp-route-id="@product.Id">Delete</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Styles {
+    <style>
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
         }
-    </tbody>
-</table>
+
+        .product-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-image {
+            height: 200px;
+            background-color: #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .placeholder-image {
+            width: 100px;
+            height: 100px;
+            background-color: #999;
+            border-radius: 4px;
+        }
+
+        .product-details {
+            padding: 15px;
+            flex-grow: 1;
+        }
+
+        .product-details h3 {
+            margin-top: 0;
+        }
+
+        .product-actions {
+            margin-top: 10px;
+        }
+
+        .product-actions .btn {
+            margin-right: 5px;
+        }
+    </style>
+}
