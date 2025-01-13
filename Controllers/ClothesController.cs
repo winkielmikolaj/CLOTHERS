@@ -88,6 +88,7 @@ namespace Clothers.Controllers
                 product.Description = updatedProduct.Description;
                 product.Price = updatedProduct.Price;
                 product.Quantity = updatedProduct.Quantity;
+                product.Sizes = updatedProduct.Sizes;
 
                 try
                 {
