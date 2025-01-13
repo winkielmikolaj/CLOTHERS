@@ -57,7 +57,7 @@ namespace Clothers.Controllers
 
             if (product == null)
             {
-                return NotFound();
+                return NotFound("Nie znaleziono takiego produktu!");
             }
 
             return View(product);
@@ -66,12 +66,42 @@ namespace Clothers.Controllers
         // POST: ClothesController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult Edit(int id, Product product)
+        public async Task<IActionResult> Edit(int id, Product updatedProduct)
         {
+            
 
+            if (id != updatedProduct.Id)
+            {
+                return BadRequest("Nieprawidłowy identyfikator obiektu.");
+            }
 
+            var product = await _context.Products.FindAsync(id);
 
-            return RedirectToAction(nameof(Index));
+            if(product == null)
+            {
+                return NotFound("Nie znaleziono takiego produktu!");
+            }
+
+            if (ModelState.IsValid)
+            {
+                product.Name = updatedProduct.Name;
+                product.Description = updatedProduct.Description;
+                product.Price = updatedProduct.Price;
+                product.Quantity = updatedProduct.Quantity;
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (DbUpdateException)
+                {
+                    TempData["ErrorMessage"] = "Wystąpił błąd podczasz zapisywania zmian. Spróbuj ponownie";
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+
+            return View(updatedProduct);
         }
 
         // GET: ClothesController/Delete/5
