@@ -120,21 +120,44 @@ namespace Clothers.Controllers
         }
 
         // POST: ClothesController/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id, Product product)
+        public async Task<IActionResult> Delete(int id, int quantityToRemove)
         {
+            var product = await _context.Products.FindAsync(id);
+
             if (product == null)
             {
                 return NotFound("Nie znaleziono takiego produktu!");
             }
 
-            if (ModelState.IsValid)
+            if (quantityToRemove <= 0)
             {
+                TempData["ErrorMessage"] = "Ilość do usunięcia musi być większa niż zero.";
+                return RedirectToAction(nameof(Index));
+            }
 
+            if (product.Quantity >= quantityToRemove)
+            {
+                product.Quantity -= quantityToRemove;
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Ilość produktu została zmniejszona.";
+                }
+                catch (DbUpdateException)
+                {
+                    TempData["ErrorMessage"] = "Wystąpił błąd podczas zapisywania zmian. Spróbuj ponownie.";
+                }
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Ilość do usunięcia przekracza dostępny stan magazynowy.";
             }
 
             return RedirectToAction(nameof(Index));
         }
+
     }
 }

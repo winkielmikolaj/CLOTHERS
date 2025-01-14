@@ -1,16 +1,12 @@
 ﻿@model Clothers.Models.Product
 
 @{
-    ViewData["Title"] = "Delete Product";
+    ViewData["Title"] = "Delete Product Quantity";
 }
 
-<h2>Delete Product</h2>
+<h2>Usuń ilość produktu</h2>
 
-<div class="alert alert-warning" role="alert">
-    Czy na pewno chcesz usunąć ten produkt? Operacji tej nie można cofnąć.
-</div>
-
-<div>
+<div class="product-card border p-3 mb-3">
     <dl class="row">
         <dt class="col-sm-2">Nazwa</dt>
         <dd class="col-sm-10">@Model.Name</dd>
@@ -24,15 +20,47 @@
         <dt class="col-sm-2">Rozmiar</dt>
         <dd class="col-sm-10">@Model.Sizes</dd>
 
-        <dt class="col-sm-2">Ilość</dt>
-        <dd class="col-sm-10">@Model.Quantity</dd>
+        <dt class="col-sm-2">Ilość dostępna</dt>
+        <dd class="col-sm-10">
+            @if (Model.Quantity == 0)
+            {
+                <span class="badge bg-danger">Produkt tymczasowo niedostępny</span>
+            }
+            else
+            {
+                @Model.Quantity
+            }
+        </dd>
     </dl>
+</div>
+
+@if (Model.Quantity > 0)
+{
+    <div class="alert alert-warning" role="alert">
+        Czy na pewno chcesz zmniejszyć ilość tego produktu? Podaj ilość, którą chcesz usunąć.
+    </div>
 
     <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
-        @* Token antyfałszywego żądania *@
         @Html.AntiForgeryToken()
 
-        <button type="submit" class="btn btn-danger">Usuń</button>
-        <a asp-action="Index" class="btn btn-secondary">Anuluj</a>
+        <div class="form-group">
+            <label for="quantityToRemove" class="form-label">Ilość do usunięcia</label>
+            <input id="quantityToRemove" name="quantityToRemove" type="number" class="form-control" min="1" max="@Model.Quantity" required />
+        </div>
+
+        <div class="mt-3">
+            <button type="submit" class="btn btn-danger">Usuń ilość</button>
+            <a asp-action="Index" class="btn btn-secondary">Anuluj</a>
+        </div>
     </form>
-</div>
+}
+else
+{
+    <div class="alert alert-danger" role="alert">
+        Nie można zmniejszyć ilości, ponieważ produkt jest niedostępny.
+    </div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
