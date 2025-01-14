@@ -106,24 +106,35 @@ namespace Clothers.Controllers
         }
 
         // GET: ClothesController/Delete/5
-        public ActionResult Delete(int id)
+        [HttpGet]
+        public async Task<IActionResult> Delete(int id)
         {
-            return View();
+            var product = await _context.Products.FindAsync(id);
+
+            if (product == null)
+            {
+                return NotFound("Nie znaleziono takiego produktu!");
+            }
+
+            return View(product);
         }
 
         // POST: ClothesController/Delete/5
-        [HttpPost]
+        [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public async Task<IActionResult> DeleteConfirmed(int id, Product product)
         {
-            try
+            if (product == null)
             {
-                return RedirectToAction(nameof(Index));
+                return NotFound("Nie znaleziono takiego produktu!");
             }
-            catch
+
+            if (ModelState.IsValid)
             {
-                return View();
+
             }
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }
