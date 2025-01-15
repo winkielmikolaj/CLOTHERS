@@ -1,13 +1,13 @@
 ﻿using Clothers.Enums;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
-namespace Clothers.Models
+namespace Clothers.ViewModels
 {
-    public class Product
+    public class ProductsViewModel
     {
+        [Required]
         public int Id { get; set; }
 
         [Required]
@@ -30,15 +30,5 @@ namespace Clothers.Models
 
 
         public byte[]? Image { get; set; }
-
-
-        public bool IsApproved { get; set; }
-
-        [Required]
-        public string UserId { get; set; }
-
-
-        [ForeignKey(nameof(UserId))]
-        public IdentityUser User { get; set; }
     }
 }

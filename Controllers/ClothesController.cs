@@ -1,6 +1,8 @@
 ﻿using Clothers.Data;
 using Clothers.Models;
+using Clothers.ViewModels;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,12 +10,13 @@ namespace Clothers.Controllers
 {
     public class ClothesController : Controller
     {
-
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public ClothesController(ApplicationDbContext context)
+        public ClothesController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: ClothesController
@@ -23,13 +26,18 @@ namespace Clothers.Controllers
         }
 
         // GET: ClothesController/Details/5
-        public ActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
-            return View();
+            var product = await _context.Products.FindAsync(id);
+            if (product == null)
+            {
+                return NotFound("Nie znaleziono takiego produktu!");
+            }
+            return View(product);
         }
 
         // GET: ClothesController/Create
-        public ActionResult Create()
+        public IActionResult Create()
         {
             return View();
         }
@@ -37,10 +45,20 @@ namespace Clothers.Controllers
         // POST: ClothesController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Product product, IFormFile Image)
+        public async Task<IActionResult> Create(ProductsViewModel productVm, IFormFile Image)
         {
             if (ModelState.IsValid)
             {
+                var product = new Product
+                {
+                    Name = productVm.Name,
+                    Description = productVm.Description,
+                    Price = productVm.Price,
+                    Quantity = productVm.Quantity,
+                    Sizes = productVm.Sizes,
+                    UserId = _userManager.GetUserId(User),
+                };
+
                 if (Image != null && Image.Length > 0)
                 {
                     using (var memoryStream = new MemoryStream())
@@ -49,16 +67,18 @@ namespace Clothers.Controllers
                         product.Image = memoryStream.ToArray(); // Zapisanie obrazu w bazie jako byte[]
                     }
                 }
+                else
+                {
+                    product.Image = productVm.Image;
+                }
 
-                _context.Add(product);
+                _context.Products.Add(product);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
 
-            return View(product);
+            return View(productVm);
         }
-
-
 
         // GET: ClothesController/Edit/5
         [HttpGet]
@@ -71,15 +91,26 @@ namespace Clothers.Controllers
                 return NotFound("Nie znaleziono takiego produktu!");
             }
 
-            return View(product);
+            var productVm = new ProductsViewModel
+            {
+                Id = product.Id, // Przypisanie Id
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                Quantity = product.Quantity,
+                Sizes = product.Sizes,
+                Image = product.Image
+            };
+
+            return View(productVm);
         }
 
         // POST: ClothesController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Product updatedProduct, IFormFile Image)
+        public async Task<IActionResult> Edit(int id, ProductsViewModel productVm, IFormFile Image)
         {
-            if (id != updatedProduct.Id)
+            if (id != productVm.Id)
             {
                 return BadRequest("Nieprawidłowy identyfikator obiektu.");
             }
@@ -92,11 +123,11 @@ namespace Clothers.Controllers
 
             if (ModelState.IsValid)
             {
-                product.Name = updatedProduct.Name;
-                product.Description = updatedProduct.Description;
-                product.Price = updatedProduct.Price;
-                product.Quantity = updatedProduct.Quantity;
-                product.Sizes = updatedProduct.Sizes;
+                product.Name = productVm.Name;
+                product.Description = productVm.Description;
+                product.Price = productVm.Price;
+                product.Quantity = productVm.Quantity;
+                product.Sizes = productVm.Sizes;
 
                 // Obsługa zdjęcia
                 if (Image != null && Image.Length > 0)
@@ -107,9 +138,11 @@ namespace Clothers.Controllers
                         product.Image = memoryStream.ToArray();  // Zapisujemy zdjęcie jako tablicę bajtów
                     }
                 }
+                // Jeśli nie przesłano nowego obrazu, zachowaj istniejący
 
                 try
                 {
+                    _context.Update(product);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
                 }
@@ -119,9 +152,8 @@ namespace Clothers.Controllers
                 }
             }
 
-            return View(updatedProduct);
+            return View(productVm);
         }
-
 
         // GET: ClothesController/Delete/5
         [HttpGet]
@@ -176,6 +208,5 @@ namespace Clothers.Controllers
 
             return RedirectToAction(nameof(Index));
         }
-
     }
 }

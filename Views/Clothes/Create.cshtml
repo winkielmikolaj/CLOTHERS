@@ -1,4 +1,5 @@
-﻿@model Clothers.Models.Product
+﻿@using Clothers.Enums
+@model Clothers.ViewModels.ProductsViewModel
 
 @{
     ViewData["Title"] = "Create Product";
@@ -26,8 +27,10 @@
     </div>
 
     <div class="form-group">
-        <label asp-for="Sizes" class="form-label"></label>
-        <select asp-for="Sizes" asp-items="Html.GetEnumSelectList<Clothers.Enums.ProductSizes>()" class="form-control"></select>
+        <label asp-for="Sizes" class="control-label"></label>
+        <select asp-for="Sizes" class="form-control" asp-items="Html.GetEnumSelectList<ProductSizes>()">
+            <option value="">-- Wybierz rozmiar --</option>
+        </select>
         <span asp-validation-for="Sizes" class="text-danger"></span>
     </div>
 
