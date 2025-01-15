@@ -1,4 +1,5 @@
 using Clothers.Data;
+using Clothers.Constants;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -50,37 +51,10 @@ namespace Clothers
             //seeding roles
             using(var scope = app.Services.CreateScope())
             {
-                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                var services = scope.ServiceProvider;
 
-                var roles = new[] { "Admin", "Company", "User" };
-
-                foreach (var role in roles)
-                {
-                    if (!await roleManager.RoleExistsAsync(role))
-                    {
-                        await roleManager.CreateAsync(new IdentityRole(role));
-                    }
-                }
-            }
-
-            //seeding admin
-            using (var scope = app.Services.CreateScope())
-            {
-                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
-
-                string email = "admin@admin.com";
-                string password = "Admin123.";
-
-                if (await userManager.FindByEmailAsync(email) == null)
-                {
-                    var user = new IdentityUser();
-                    user.UserName = email;
-                    user.Email = email;
-
-                    await userManager.CreateAsync(user, password);
-
-                    await userManager.AddToRoleAsync(user, "Admin");
-                }
+                RoleSeeder.SeedRolesAsync(services).Wait();
+                UserSeeder.SeedUsersAsync(services).Wait();
             }
 
             app.Run();
