@@ -77,18 +77,15 @@ namespace Clothers.Controllers
         // POST: ClothesController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Product updatedProduct)
+        public async Task<IActionResult> Edit(int id, Product updatedProduct, IFormFile Image)
         {
-            
-
             if (id != updatedProduct.Id)
             {
                 return BadRequest("Nieprawidłowy identyfikator obiektu.");
             }
 
             var product = await _context.Products.FindAsync(id);
-
-            if(product == null)
+            if (product == null)
             {
                 return NotFound("Nie znaleziono takiego produktu!");
             }
@@ -101,6 +98,16 @@ namespace Clothers.Controllers
                 product.Quantity = updatedProduct.Quantity;
                 product.Sizes = updatedProduct.Sizes;
 
+                // Obsługa zdjęcia
+                if (Image != null && Image.Length > 0)
+                {
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        await Image.CopyToAsync(memoryStream);
+                        product.Image = memoryStream.ToArray();  // Zapisujemy zdjęcie jako tablicę bajtów
+                    }
+                }
+
                 try
                 {
                     await _context.SaveChangesAsync();
@@ -108,13 +115,13 @@ namespace Clothers.Controllers
                 }
                 catch (DbUpdateException)
                 {
-                    TempData["ErrorMessage"] = "Wystąpił błąd podczasz zapisywania zmian. Spróbuj ponownie";
-                    return RedirectToAction(nameof(Index));
+                    TempData["ErrorMessage"] = "Wystąpił błąd podczas zapisywania zmian. Spróbuj ponownie.";
                 }
             }
 
             return View(updatedProduct);
         }
+
 
         // GET: ClothesController/Delete/5
         [HttpGet]

@@ -6,8 +6,7 @@
 
 <h2>Edit Product</h2>
 
-<form asp-action="Edit" asp-controller="Clothes" method="post">
-    @* Ukryte pole na identyfikator produktu *@
+<form asp-action="Edit" asp-controller="Clothes" method="post" enctype="multipart/form-data">
     <input type="hidden" asp-for="Id" />
 
     <div class="form-group">
@@ -38,6 +37,17 @@
         <label asp-for="Quantity" class="form-label"></label>
         <input asp-for="Quantity" class="form-control" type="number" />
         <span asp-validation-for="Quantity" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="Image" class="form-label">Product Image</label>
+        @if (Model.Image != null && Model.Image.Length > 0)
+        {
+            <div>
+                <img src="@Url.Content("data:image/jpeg;base64," + Convert.ToBase64String(Model.Image))" alt="Product Image" style="max-width: 200px; max-height: 200px;" />
+            </div>
+        }
+        <input type="file" id="Image" name="Image" class="form-control" />
     </div>
 
     <button type="submit" class="btn btn-primary">Save Changes</button>
