@@ -26,5 +26,8 @@ namespace Clothers.Models
 
         [Required]
         public int Quantity { get; set; }
+
+
+        public byte[]? Image { get; set; }
     }
 }

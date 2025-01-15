@@ -37,10 +37,19 @@ namespace Clothers.Controllers
         // POST: ClothesController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Product product)
+        public async Task<IActionResult> Create(Product product, IFormFile Image)
         {
             if (ModelState.IsValid)
             {
+                if (Image != null && Image.Length > 0)
+                {
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        await Image.CopyToAsync(memoryStream);
+                        product.Image = memoryStream.ToArray(); // Zapisanie obrazu w bazie jako byte[]
+                    }
+                }
+
                 _context.Add(product);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -48,6 +57,8 @@ namespace Clothers.Controllers
 
             return View(product);
         }
+
+
 
         // GET: ClothesController/Edit/5
         [HttpGet]
