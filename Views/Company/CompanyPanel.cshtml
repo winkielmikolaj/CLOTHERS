@@ -1,7 +1,108 @@
-﻿@{
+﻿@model IEnumerable<Clothers.Models.Product>
+
+@{
     ViewData["Title"] = "Panel Firmy";
 }
 
-<h2>Panel firmy</h2>
+<h2>Panel Firmy</h2>
 
-<p>Witamy w panelu twojej firmy!</p>
+<p>
+    <a class="btn btn-primary" asp-action="Create" asp-controller="Clothes">Dodaj Nową Ofertę</a>
+</p>
+
+@if (!Model.Any())
+{
+    <p>Nie masz jeszcze żadnych ofert.</p>
+}
+else
+{
+    <div class="product-grid">
+        @foreach (var product in Model)
+        {
+            <div class="product-card">
+                <div class="product-image">
+                    @if (product.Image != null)
+                    {
+                        <img src="data:image/jpeg;base64,@Convert.ToBase64String(product.Image)"
+                             alt="Product Image"
+                             style="width:100%; height:200px; object-fit:cover;" />
+                    }
+                    else
+                    {
+                        <div class="placeholder-image"></div>
+                    }
+                </div>
+                <div class="product-details">
+                    <h3>@product.Name</h3>
+                    <p>@product.Description</p>
+                    <p><strong>Cena:</strong> @product.Price.ToString("C")</p>
+                    <p><strong>Ilość:</strong> @product.Quantity</p>
+                    <p><strong>Rozmiar:</strong> @product.Sizes</p>
+                    <div class="product-actions">
+                        <a class="btn btn-secondary" asp-action="Details" asp-controller="Clothes" asp-route-id="@product.Id">Szczegóły</a>
+                        <a class="btn btn-warning" asp-action="Edit" asp-controller="Clothes" asp-route-id="@product.Id">Edytuj</a>
+                        <a class="btn btn-danger" asp-action="Delete" asp-controller="Clothes" asp-route-id="@product.Id">Usuń</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@section Styles {
+    <style>
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .product-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-image {
+            height: 200px;
+            background-color: #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .placeholder-image {
+            width: 100px;
+            height: 100px;
+            background-color: #999;
+            border-radius: 4px;
+        }
+
+        .product-details {
+            padding: 15px;
+            flex-grow: 1;
+        }
+
+        .product-details h3 {
+            margin-top: 0;
+        }
+
+        .product-actions {
+            margin-top: 10px;
+        }
+
+        .product-actions .btn {
+            margin-right: 5px;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+}
