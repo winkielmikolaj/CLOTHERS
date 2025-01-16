@@ -22,7 +22,11 @@ namespace Clothers.Controllers
         // GET: ClothesController
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Products.ToListAsync());
+            // Filtrowanie produktów, które są zaakceptowane
+            var approvedProducts = await _context.Products
+                .Where(p => p.IsApproved)
+                .ToListAsync();
+            return View(approvedProducts);
         }
 
         // GET: ClothesController/Details/5
@@ -57,6 +61,7 @@ namespace Clothers.Controllers
                     Quantity = productVm.Quantity,
                     Sizes = productVm.Sizes,
                     UserId = _userManager.GetUserId(User),
+                    IsApproved = false
                 };
 
                 if (Image != null && Image.Length > 0)
