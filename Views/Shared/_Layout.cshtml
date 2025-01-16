@@ -32,6 +32,12 @@
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="AdminPanel">Panel Administratora</a>
                             </li>
                         }
+                        @if (User.IsInRole("Company"))
+                        {
+                        <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Company" asp-action="CompanyPanel">Moje oferty</a>
+                        </li>
+                        }
                     </ul>
                     <partial name="_LoginPartial" />
                 </div>
