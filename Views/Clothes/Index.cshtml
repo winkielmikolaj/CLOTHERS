@@ -1,13 +1,23 @@
 ﻿@model IEnumerable<Clothers.Models.Product>
 
 @{
-    ViewData["Title"] = "Products";
+    ViewData["Title"] = "Produkty";
 }
 
-<h1>Products</h1>
+<h1>Produkty</h1>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
 
 <p>
-    <a class="btn btn-primary" asp-action="Create">Create New</a>
+    <a class="btn btn-primary" asp-action="Create">Dodaj Nowy Produkt</a>
 </p>
 
 <div class="product-grid">
@@ -30,13 +40,25 @@
             <div class="product-details">
                 <h3>@product.Name</h3>
                 <p>@product.Description</p>
-                <p><strong>Price:</strong> @product.Price.ToString("C")</p>
-                <p><strong>Quantity:</strong> @product.Quantity</p>
-                <p><strong>Size:</strong> @product.Sizes</p>
+                <p><strong>Cena:</strong> @product.Price.ToString("C")</p>
+                <p><strong>Ilość:</strong> @product.Quantity</p>
+                <p><strong>Rozmiar:</strong> @product.Sizes</p>
                 <div class="product-actions">
-                    <a class="btn btn-secondary" asp-action="Details" asp-route-id="@product.Id">Details</a>
-                    <a class="btn btn-warning" asp-action="Edit" asp-route-id="@product.Id">Edit</a>
-                    <a class="btn btn-danger" asp-action="Delete" asp-route-id="@product.Id">Delete</a>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <form asp-action="AddToCart" method="post">
+                            <input type="hidden" name="id" value="@product.Id" />
+                            <div class="input-group" style="width: 120px;">
+                                <input type="number" name="quantity" value="1" min="1" max="@product.Quantity" class="form-control" />
+                                <button type="submit" class="btn btn-primary">Dodaj do Koszyka</button>
+                            </div>
+                        </form>
+                    }
+                    else
+                    {
+                        <a class="btn btn-secondary" asp-area="Identity" asp-page="/Account/Login">Zaloguj się, aby dodać</a>
+
+                    }
                 </div>
             </div>
         </div>

@@ -1,10 +1,12 @@
 ﻿using Clothers.Data;
 using Clothers.Models;
 using Clothers.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace Clothers.Controllers
 {
@@ -19,17 +21,15 @@ namespace Clothers.Controllers
             _userManager = userManager;
         }
 
-        // GET: ClothesController
         public async Task<IActionResult> Index()
         {
-            // Filtrowanie produktów, które są zaakceptowane
+            //tylko approved produkty
             var approvedProducts = await _context.Products
                 .Where(p => p.IsApproved)
                 .ToListAsync();
             return View(approvedProducts);
         }
 
-        // GET: ClothesController/Details/5
         public async Task<IActionResult> Details(int id)
         {
             var product = await _context.Products.FindAsync(id);
@@ -40,13 +40,11 @@ namespace Clothers.Controllers
             return View(product);
         }
 
-        // GET: ClothesController/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: ClothesController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ProductsViewModel productVm, IFormFile Image)
@@ -69,7 +67,7 @@ namespace Clothers.Controllers
                     using (var memoryStream = new MemoryStream())
                     {
                         await Image.CopyToAsync(memoryStream);
-                        product.Image = memoryStream.ToArray(); // Zapisanie obrazu w bazie jako byte[]
+                        product.Image = memoryStream.ToArray(); //zapisanie obrazu jako bit tabilac
                     }
                 }
                 else
@@ -85,7 +83,6 @@ namespace Clothers.Controllers
             return View(productVm);
         }
 
-        // GET: ClothesController/Edit/5
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -98,7 +95,7 @@ namespace Clothers.Controllers
 
             var productVm = new ProductsViewModel
             {
-                Id = product.Id, // Przypisanie Id
+                Id = product.Id,
                 Name = product.Name,
                 Description = product.Description,
                 Price = product.Price,
@@ -110,7 +107,6 @@ namespace Clothers.Controllers
             return View(productVm);
         }
 
-        // POST: ClothesController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, ProductsViewModel productVm, IFormFile Image)
@@ -134,16 +130,15 @@ namespace Clothers.Controllers
                 product.Quantity = productVm.Quantity;
                 product.Sizes = productVm.Sizes;
 
-                // Obsługa zdjęcia
+                //logiak dodawania zdjecia
                 if (Image != null && Image.Length > 0)
                 {
                     using (var memoryStream = new MemoryStream())
                     {
                         await Image.CopyToAsync(memoryStream);
-                        product.Image = memoryStream.ToArray();  // Zapisujemy zdjęcie jako tablicę bajtów
+                        product.Image = memoryStream.ToArray();
                     }
                 }
-                // Jeśli nie przesłano nowego obrazu, zachowaj istniejący
 
                 try
                 {
@@ -160,7 +155,6 @@ namespace Clothers.Controllers
             return View(productVm);
         }
 
-        // GET: ClothesController/Delete/5
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
@@ -174,7 +168,6 @@ namespace Clothers.Controllers
             return View(product);
         }
 
-        // POST: ClothesController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id, int quantityToRemove)
@@ -213,5 +206,175 @@ namespace Clothers.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+
+        [Authorize]
+        public async Task<IActionResult> Cart()
+        {
+            var userId = _userManager.GetUserId(User);
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var cart = await _context.Carts
+                .Include(c => c.Items)
+                .ThenInclude(ci => ci.Product)
+                .FirstOrDefaultAsync(c => c.UserId == userId);
+
+            var cartViewModel = new CartViewModel();
+
+            if (cart != null)
+            {
+                cartViewModel.Items = cart.Items.Select(ci => new CartItemViewModel
+                {
+                    ProductId = ci.ProductId,
+                    ProductName = ci.Product.Name,
+                    Price = ci.Product.Price,
+                    Quantity = ci.Quantity,
+                    Total = ci.Product.Price * ci.Quantity,
+                    Image = ci.Product.Image
+                }).ToList();
+
+                cartViewModel.Total = cartViewModel.Items.Sum(i => i.Total);
+            }
+
+            return View(cartViewModel);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddToCart(int id, int quantity = 1)
+        {
+            var product = await _context.Products.FindAsync(id);
+            if (product == null || !product.IsApproved)
+            {
+                TempData["ErrorMessage"] = "Produkt nie istnieje lub nie jest dostępny.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var userId = _userManager.GetUserId(User);
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            //zczytywanie z bazy koszyk uzytkownika
+            var cart = await _context.Carts
+                .Include(c => c.Items)
+                .FirstOrDefaultAsync(c => c.UserId == userId);
+
+            if (cart == null)
+            {
+                cart = new Cart
+                {
+                    UserId = userId,
+                    Items = new List<CartItem>()
+                };
+                _context.Carts.Add(cart);
+            }
+
+            //checking czy produkt jest w koszu
+            var cartItem = cart.Items.FirstOrDefault(ci => ci.ProductId == id);
+            if (cartItem != null)
+            {
+                cartItem.Quantity += quantity;
+            }
+            else
+            {
+                cart.Items.Add(new CartItem
+                {
+                    ProductId = id,
+                    Quantity = quantity
+                });
+            }
+
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Produkt został dodany do koszyka.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveFromCart(int id)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var cart = await _context.Carts
+                .Include(c => c.Items)
+                .FirstOrDefaultAsync(c => c.UserId == userId);
+
+            if (cart == null)
+            {
+                TempData["ErrorMessage"] = "Koszyk jest pusty.";
+                return RedirectToAction(nameof(Cart));
+            }
+
+            var cartItem = cart.Items.FirstOrDefault(ci => ci.ProductId == id);
+            if (cartItem != null)
+            {
+                _context.CartItems.Remove(cartItem);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Produkt został usunięty z koszyka.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Produkt nie został znaleziony w koszyku.";
+            }
+
+            return RedirectToAction(nameof(Cart));
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Checkout()
+        {
+            var userId = _userManager.GetUserId(User);
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var cart = await _context.Carts
+                .Include(c => c.Items)
+                .ThenInclude(ci => ci.Product)
+                .FirstOrDefaultAsync(c => c.UserId == userId);
+
+            if (cart == null || !cart.Items.Any())
+            {
+                TempData["ErrorMessage"] = "Koszyk jest pusty.";
+                return RedirectToAction(nameof(Cart));
+            }
+
+            //aktualizacja zamowienia
+            foreach (var item in cart.Items)
+            {
+                var product = await _context.Products.FindAsync(item.ProductId);
+                if (product != null)
+                {
+                    product.Quantity -= item.Quantity;
+                    if (product.Quantity < 0)
+                    {
+                        product.Quantity = 0;
+                    }
+                }
+            }
+
+//usuniecie koszyka po zamowieniu
+            _context.Carts.Remove(cart);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Zamówienie zostało zrealizowane pomyślnie.";
+            return RedirectToAction(nameof(Index));
+        }
+
     }
 }

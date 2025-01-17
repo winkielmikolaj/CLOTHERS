@@ -1,0 +1,68 @@
+﻿@using Clothers.ViewModels
+@model CartViewModel
+
+
+@{
+    ViewData["Title"] = "Koszyk";
+}
+
+<h2>Koszyk</h2>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+@if (!Model.Items.Any())
+{
+    <p>Twój koszyk jest pusty.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Produkt</th>
+                <th>Cena</th>
+                <th>Ilość</th>
+                <th>Razem</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>
+                        @if (item.Image != null)
+                        {
+                            <img src="data:image/jpeg;base64,@Convert.ToBase64String(item.Image)" alt="@item.ProductName" width="50" />
+                        }
+                        @item.ProductName
+                    </td>
+                    <td>@item.Price.ToString("C")</td>
+                    <td>@item.Quantity</td>
+                    <td>@item.Total.ToString("C")</td>
+                    <td>
+                        <form asp-action="RemoveFromCart" method="post" asp-route-id="@item.ProductId" onsubmit="return confirm('Czy na pewno chcesz usunąć ten produkt z koszyka?');">
+                            <button type="submit" class="btn btn-danger btn-sm">Usuń</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            <tr>
+                <td colspan="3" class="text-end"><strong>Razem:</strong></td>
+                <td colspan="2"><strong>@Model.Total.ToString("C")</strong></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <form asp-action="Checkout" method="post">
+        <button type="submit" class="btn btn-success">Zrealizuj Zamówienie</button>
+    </form>
+}
