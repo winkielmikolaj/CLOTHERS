@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Clothers.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250117094721_Cart")]
-    partial class Cart
+    [Migration("20250117171044_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
