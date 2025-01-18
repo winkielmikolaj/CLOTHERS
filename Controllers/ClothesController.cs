@@ -25,7 +25,7 @@ namespace Clothers.Controllers
         {
             //tylko approved produkty
             var approvedProducts = await _context.Products
-                .Where(p => p.IsApproved)
+                .Where(p => p.IsApproved && p.Quantity > 0)
                 .ToListAsync();
             return View(approvedProducts);
         }
