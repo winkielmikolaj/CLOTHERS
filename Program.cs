@@ -2,6 +2,8 @@ using Clothers.Data;
 using Clothers.Constants;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Clothers.Services;
+using QuestPDF.Infrastructure;
 
 namespace Clothers
 {
@@ -21,6 +23,12 @@ namespace Clothers
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
+
+            //licencja community
+            QuestPDF.Settings.License = LicenseType.Community;
+
+            //usluga pdf
+            builder.Services.AddTransient<OrderPdfGenerator>();
 
             //usluga sesji
             builder.Services.AddDistributedMemoryCache();

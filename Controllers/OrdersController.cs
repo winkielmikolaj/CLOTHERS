@@ -1,6 +1,7 @@
 ﻿using Clothers.Constants;
 using Clothers.Data;
 using Clothers.Models;
+using Clothers.Services;
 using Clothers.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -16,12 +17,14 @@ namespace Clothers.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ILogger<OrdersController> _logger;
+        private readonly OrderPdfGenerator _pdfGenerator;
 
-        public OrdersController(ApplicationDbContext context, UserManager<IdentityUser> userManager, ILogger<OrdersController> logger)
+        public OrdersController(ApplicationDbContext context, UserManager<IdentityUser> userManager, ILogger<OrdersController> logger, OrderPdfGenerator pdfGenerator)
         {
             _context = context;
             _userManager = userManager;
             _logger = logger;
+            _pdfGenerator = pdfGenerator;
         }
 
         // GET: Orders/Create
@@ -110,7 +113,9 @@ namespace Clothers.Controllers
                 try
                 {
                     await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Confirmation));
+
+                    // Przekierowanie do akcji Confirmation z przekazaniem orderId
+                    return RedirectToAction(nameof(Confirmation), new { orderId = order.Id });
                 }
                 catch (Exception ex)
                 {
@@ -124,9 +129,19 @@ namespace Clothers.Controllers
         }
 
         // GET: Orders/Confirmation
-        public IActionResult Confirmation()
+        public async Task<IActionResult> Confirmation(int orderId)
         {
-            return View();
+            var order = await _context.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .FirstOrDefaultAsync(o => o.Id == orderId && o.UserId == _userManager.GetUserId(User));
+
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            return View(order);
         }
 
         // GET: Orders/MyOrders
@@ -142,5 +157,22 @@ namespace Clothers.Controllers
 
             return View(orders);
         }
+
+        public async Task<IActionResult> DownloadPdf(int orderId)
+        {
+            var order = await _context.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .FirstOrDefaultAsync(o => o.Id == orderId && o.UserId == _userManager.GetUserId(User));
+
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            var pdfBytes = _pdfGenerator.GeneratePdf(order);
+            return File(pdfBytes, "application/pdf", $"Order_{order.Id}.pdf");
+        }
+
     }
 }

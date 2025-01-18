@@ -1,6 +1,51 @@
-﻿@{
+﻿@model Clothers.Models.Order
+
+@{
     ViewData["Title"] = "Potwierdzenie Zamówienia";
 }
 
 <h2>Potwierdzenie Zamówienia</h2>
-<p>Dziękujemy za Twoje zamówienie! Otrzymasz potwierdzenie na podany adres e-mail.</p>
+
+<p>Dziękujemy za złożenie zamówienia, @Model.FirstName @Model.LastName!</p>
+
+<p>Numer zamówienia: <strong>@Model.Id</strong></p>
+<p>Data zamówienia: <strong>@Model.OrderDate.ToString("dd-MM-yyyy HH:mm")</strong></p>
+
+<h3>Szczegóły Zamówienia</h3>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Nazwa Produktu</th>
+            <th>Ilość</th>
+            <th>Cena Jednostkowa</th>
+            <th>Razem</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.OrderItems)
+        {
+            <tr>
+                <td>@item.Product.Name</td>
+                <td>@item.Quantity</td>
+                <td>@item.UnitPrice.ToString("C")</td>
+                <td>@item.TotalPrice.ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<p><strong>Suma Totalna: @Model.OrderItems.Sum(i => i.TotalPrice).ToString("C")</strong></p>
+
+<p>
+    <a class="btn btn-primary" href="@Url.Action("DownloadPdf", "Orders", new { orderId = Model.Id })">Pobierz Potwierdzenie PDF</a>
+</p>
+
+@section Scripts {
+    <script>
+        window.onload = function() {
+            // Automatyczne pobranie PDF po załadowaniu strony
+            window.location.href = '@Url.Action("DownloadPdf", "Orders", new { orderId = Model.Id })';
+        };
+    </script>
+}
