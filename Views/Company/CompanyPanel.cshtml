@@ -8,6 +8,7 @@
 
 <p>
     <a class="btn btn-primary" asp-action="Create" asp-controller="Clothes">Dodaj Nową Ofertę</a>
+    <a class="btn btn-info" asp-action="MyOrders" asp-controller="Company">Moje Zamówienia</a>
 </p>
 
 @if (!Model.Any())
@@ -88,17 +89,17 @@ else
             flex-grow: 1;
         }
 
-        .product-details h3 {
-            margin-top: 0;
-        }
+            .product-details h3 {
+                margin-top: 0;
+            }
 
         .product-actions {
             margin-top: 10px;
         }
 
-        .product-actions .btn {
-            margin-right: 5px;
-        }
+            .product-actions .btn {
+                margin-right: 5px;
+            }
 
         img {
             max-width: 100%;

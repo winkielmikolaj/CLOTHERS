@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Clothers.Controllers
@@ -31,6 +32,18 @@ namespace Clothers.Controllers
                 .ToListAsync();
 
             return View(userOffers);
+        }
+
+        public async Task<IActionResult> MyOrders()
+        {
+            var userId = _userManager.GetUserId(User);
+            var orders = await _context.Orders
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Product)
+                .Where(o => o.OrderItems.Any(oi => oi.Product.UserId == userId))
+                .ToListAsync();
+
+            return View(orders);
         }
     }
 }

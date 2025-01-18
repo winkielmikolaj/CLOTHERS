@@ -1,7 +1,6 @@
 ﻿@using Clothers.ViewModels
 @model CartViewModel
 
-
 @{
     ViewData["Title"] = "Koszyk";
 }
@@ -62,7 +61,7 @@ else
         </tbody>
     </table>
 
-    <form asp-action="Checkout" method="post">
-        <button type="submit" class="btn btn-success">Zrealizuj Zamówienie</button>
-    </form>
+    <div class="cart-actions">
+        <a asp-controller="Orders" asp-action="Create" class="btn btn-success">Zrealizuj Zamówienie</a>
+    </div>
 }

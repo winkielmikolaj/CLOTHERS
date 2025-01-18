@@ -1,0 +1,54 @@
+﻿@model Clothers.ViewModels.OrderViewModel
+
+@{
+    ViewData["Title"] = "Złóż Zamówienie";
+}
+
+<h2>Złóż Zamówienie</h2>
+
+<form asp-action="Create" method="post">
+    <div class="form-group">
+        <label asp-for="FirstName" class="control-label"></label>
+        <input asp-for="FirstName" class="form-control" />
+        <span asp-validation-for="FirstName" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="LastName" class="control-label"></label>
+        <input asp-for="LastName" class="form-control" />
+        <span asp-validation-for="LastName" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="DeliveryAddress" class="control-label"></label>
+        <input asp-for="DeliveryAddress" class="form-control" />
+        <span asp-validation-for="DeliveryAddress" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="PaymentMethod" class="control-label"></label>
+        <select asp-for="PaymentMethod" class="form-control">
+            <option value="">-- Wybierz --</option>
+            <option value="CreditCard">Karta Kredytowa</option>
+            <option value="PayPal">PayPal</option>
+            <option value="Transfer">Przelew Bankowy</option>
+        </select>
+        <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="DeliveryMethod" class="control-label"></label>
+        <select asp-for="DeliveryMethod" class="form-control">
+            <option value="">-- Wybierz --</option>
+            <option value="Standard">Standardowa</option>
+            <option value="Express">Ekspresowa</option>
+            <option value="Pickup">Odbiór Osobisty</option>
+        </select>
+        <span asp-validation-for="DeliveryMethod" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Złóż Zamówienie" class="btn btn-primary" />
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

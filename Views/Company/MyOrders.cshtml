@@ -1,0 +1,50 @@
+﻿@using System.Security.Claims
+@model IEnumerable<Clothers.Models.Order>
+
+@{
+    ViewData["Title"] = "Moje Zamówienia";
+}
+
+<h2>Moje Zamówienia</h2>
+
+@if (!Model.Any())
+{
+    <p>Nie masz jeszcze żadnych zamówień.</p>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ID Zamówienia</th>
+                <th>Data Zamówienia</th>
+                <th>Klient</th>
+                <th>Adres Dostawy</th>
+                <th>Sposób Płatności</th>
+                <th>Sposób Dostawy</th>
+                <th>Produkty</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td>@order.Id</td>
+                    <td>@order.OrderDate.ToString("dd-MM-yyyy HH:mm")</td>
+                    <td>@order.FirstName @order.LastName</td>
+                    <td>@order.DeliveryAddress</td>
+                    <td>@order.PaymentMethod</td>
+                    <td>@order.DeliveryMethod</td>
+                    <td>
+                        <ul>
+                            @foreach (var item in order.OrderItems.Where(oi => oi.Product.UserId == User.FindFirstValue(ClaimTypes.NameIdentifier)))
+                            {
+                                <li>@item.Product.Name - Ilość: @item.Quantity - Cena: @item.UnitPrice.ToString("C") - Razem: @item.TotalPrice.ToString("C")</li>
+                            }
+                        </ul>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
