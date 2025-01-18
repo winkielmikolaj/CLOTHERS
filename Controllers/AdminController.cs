@@ -1,10 +1,16 @@
-﻿using Clothers.Constants;
+﻿// Controllers/AdminController.cs
+
+using Clothers.Constants;
 using Clothers.Data;
 using Clothers.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging; // Dodany namespace
+using System;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -15,19 +21,38 @@ namespace Clothers.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly ILogger<AdminController> _logger; // Zmieniono typ
 
-        public AdminController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public AdminController(ApplicationDbContext context, UserManager<IdentityUser> userManager, ILogger<AdminController> logger)
         {
             _context = context;
             _userManager = userManager;
+            _logger = logger;
         }
 
         public async Task<IActionResult> AdminPanel()
         {
-            var products = await _context.Products
-                .Include(p => p.User)
-                .ToListAsync();
-            return View(products);
+            try
+            {
+                var products = await _context.Products
+                    .Include(p => p.User)
+                    .ToListAsync();
+
+                var users = await _userManager.Users.ToListAsync();
+
+                var model = new AdminPanelViewModel
+                {
+                    Products = products,
+                    Users = users
+                };
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Błąd podczas ładowania panelu administratora.");
+                return StatusCode(500, "Wystąpił problem podczas ładowania strony.");
+            }
         }
 
         [HttpPost]
@@ -46,5 +71,150 @@ namespace Clothers.Controllers
 
             return RedirectToAction(nameof(AdminPanel));
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteUser(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound("Nie znaleziono użytkownika.");
+            }
+
+            var result = await _userManager.DeleteAsync(user);
+            if (result.Succeeded)
+            {
+                return RedirectToAction(nameof(AdminPanel));
+            }
+
+            return BadRequest("Nie udało się usunąć użytkownika.");
+        }
+
+        public IActionResult CreateUser()
+        {
+            return PartialView("_CreateUserPartial");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateUser(CreateUserViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = new IdentityUser { UserName = model.Email, Email = model.Email };
+                var result = await _userManager.CreateAsync(user, model.Password);
+                if (result.Succeeded)
+                {
+                    if (!string.IsNullOrEmpty(model.Role))
+                    {
+                        await _userManager.AddToRoleAsync(user, model.Role);
+                    }
+                    return RedirectToAction(nameof(AdminPanel));
+                }
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+            return PartialView("_CreateUserPartial", model);
+        }
+
+        public async Task<IActionResult> EditUser(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound("Nie znaleziono użytkownika.");
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var model = new EditUserViewModel
+            {
+                Id = user.Id,
+                Email = user.Email,
+                Roles = roles
+            };
+
+            return PartialView("_EditUserPartial", model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditUser(EditUserViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByIdAsync(model.Id);
+                if (user == null)
+                {
+                    return NotFound("Nie znaleziono użytkownika.");
+                }
+
+                user.Email = model.Email;
+                user.UserName = model.Email;
+
+                var result = await _userManager.UpdateAsync(user);
+                if (result.Succeeded)
+                {
+                    var currentRoles = await _userManager.GetRolesAsync(user);
+                    await _userManager.RemoveFromRolesAsync(user, currentRoles);
+
+                    if (model.Roles != null && model.Roles.Any())
+                    {
+                        await _userManager.AddToRolesAsync(user, model.Roles);
+                    }
+
+                    return RedirectToAction(nameof(AdminPanel));
+                }
+
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+
+            return PartialView("_EditUserPartial", model);
+        }
+    }
+
+    public class AdminPanelViewModel
+    {
+        public IEnumerable<Product> Products { get; set; }
+        public IEnumerable<IdentityUser> Users { get; set; }
+    }
+
+    public class CreateUserViewModel
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; }
+
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; }
+
+        public string Role { get; set; }
+    }
+
+    public class EditUserViewModel
+    {
+        public string Id { get; set; }
+
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; }
+
+        // Lista ról przypisanych do użytkownika
+        public IList<string> Roles { get; set; }
+
+        // Lista dostępnych ról do wyboru
+        public List<SelectListItem> AvailableRoles { get; set; } = new List<SelectListItem>
+        {
+            new SelectListItem { Text = "Admin", Value = "Admin" },
+            new SelectListItem { Text = "SiteUser", Value = "SiteUser" },
+            new SelectListItem { Text = "Company", Value = "Company" }
+        };
     }
 }

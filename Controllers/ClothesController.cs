@@ -21,12 +21,20 @@ namespace Clothers.Controllers
             _userManager = userManager;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString)
         {
-            //tylko approved produkty
-            var approvedProducts = await _context.Products
-                .Where(p => p.IsApproved && p.Quantity > 0)
-                .ToListAsync();
+            // Przekazanie searchString do widoku za pomocą ViewBag
+            ViewBag.CurrentFilter = searchString;
+
+            var products = _context.Products
+                .Where(p => p.IsApproved && p.Quantity > 0);
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                products = products.Where(p => EF.Functions.Like(p.Name, $"%{searchString}%"));
+            }
+
+            var approvedProducts = await products.ToListAsync();
             return View(approvedProducts);
         }
 

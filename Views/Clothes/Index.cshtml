@@ -6,6 +6,14 @@
 
 <h1>Produkty</h1>
 
+<!-- Formularz Wyszukiwania -->
+<form asp-action="Index" method="get" class="mb-4">
+    <div class="input-group">
+        <input type="text" name="searchString" class="form-control" placeholder="Szukaj produktów..." value="@ViewBag.CurrentFilter" />
+        <button type="submit" class="btn btn-primary">Szukaj</button>
+    </div>
+</form>
+
 @if (TempData["ErrorMessage"] != null)
 {
     <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
@@ -33,7 +41,7 @@
                 }
                 else
                 {
-                    <!-- Miejsce na zdjęcie (na razie szary kwadrat) -->
+                    <!-- Placeholder Image -->
                     <div class="placeholder-image"></div>
                 }
             </div>
@@ -57,7 +65,6 @@
                     else
                     {
                         <a class="btn btn-secondary" asp-area="Identity" asp-page="/Account/Login">Zaloguj się, aby dodać</a>
-
                     }
                 </div>
             </div>

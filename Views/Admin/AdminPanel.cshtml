@@ -1,4 +1,7 @@
-﻿@model IEnumerable<Clothers.Models.Product>
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<IdentityUser> UserManager
+@* Views/Admin/AdminPanel.cshtml *@
+@model Clothers.Controllers.AdminPanelViewModel
 
 @{
     ViewData["Title"] = "Panel Admina";
@@ -6,14 +9,15 @@
 
 <h2>Panel Admina</h2>
 
-@if (!Model.Any())
+<h3>Zarządzanie Produktami</h3>
+@if (!Model.Products.Any())
 {
     <p>Brak dostępnych ofert.</p>
 }
 else
 {
     <div class="product-grid">
-        @foreach (var product in Model)
+        @foreach (var product in Model.Products)
         {
             <div class="product-card">
                 <div class="product-image">
@@ -55,6 +59,80 @@ else
         }
     </div>
 }
+
+<h3 class="mt-5">Zarządzanie Użytkownikami</h3>
+
+<button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#createUserModal">Dodaj Użytkownika</button>
+
+@if (!Model.Users.Any())
+{
+    <p>Brak zarejestrowanych użytkowników.</p>
+}
+else
+{
+    <table class="table table-striped mt-3">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model.Users)
+            {
+                <tr>
+                    <td>@user.Email</td>
+                    <td>
+                        @foreach (var role in await UserManager.GetRolesAsync(user))
+                        {
+                            <span class="badge bg-info">@role</span>
+                        }
+                    </td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editUserModal" data-user-id="@user.Id">Edytuj</button>
+                        <form asp-action="DeleteUser" method="post" class="d-inline" onsubmit="return confirm('Czy na pewno chcesz usunąć tego użytkownika?');">
+                            <input type="hidden" name="id" value="@user.Id" />
+                            <button type="submit" class="btn btn-danger btn-sm">Usuń</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<!-- Modal Dodawania Użytkownika -->
+<div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="createUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="CreateUser" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createUserModalLabel">Dodaj Użytkownika</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+                </div>
+                <div class="modal-body">
+                    @Html.Partial("_CreateUserPartial", new Clothers.Controllers.CreateUserViewModel())
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="submit" class="btn btn-primary">Dodaj</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edytowania Użytkownika -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div id="editUserContent">
+                <!-- Zawartość edycji użytkownika ładowana będzie dynamicznie -->
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Styles {
     <style>
@@ -117,4 +195,22 @@ else
             padding: 0.5em 0.75em;
         }
     </style>
+}
+
+@section Scripts {
+    <script>
+        // Ładowanie formularza edycji użytkownika do modalu
+        $('#editUserModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var userId = button.data('user-id');
+            var modal = $(this);
+            $.ajax({
+                url: '@Url.Action("EditUser", "Admin")',
+                data: { id: userId },
+                success: function (data) {
+                    modal.find('#editUserContent').html(data);
+                }
+            });
+        });
+    </script>
 }

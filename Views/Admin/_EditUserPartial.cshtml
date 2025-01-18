@@ -1,0 +1,23 @@
+﻿@model Clothers.Controllers.EditUserViewModel
+
+<form asp-action="EditUser" method="post">
+    <input type="hidden" name="Id" value="@Model.Id" />
+    <div class="modal-header">
+        <h5 class="modal-title" id="editUserModalLabel">Edytuj Użytkownika</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+    </div>
+    <div class="modal-body">
+        <div class="mb-3">
+            <label for="Email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="Email" name="Email" value="@Model.Email" required />
+        </div>
+        <div class="mb-3">
+            <label for="Roles" class="form-label">Role</label>
+            @Html.ListBoxFor(model => model.Roles, Model.AvailableRoles, new { @class = "form-select", id = "Roles" })
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+        <button type="submit" class="btn btn-primary">Zapisz</button>
+    </div>
+</form>
