@@ -24,10 +24,6 @@
     <div class="alert alert-success">@TempData["SuccessMessage"]</div>
 }
 
-<p>
-    <a class="btn btn-primary" asp-action="Create">Dodaj Nowy Produkt</a>
-</p>
-
 <div class="product-grid">
     @foreach (var product in Model)
     {
@@ -64,7 +60,7 @@
                     }
                     else
                     {
-                        <a class="btn btn-secondary" asp-area="Identity" asp-page="/Account/Login">Zaloguj się, aby dodać</a>
+                        <a class="btn btn-secondary" asp-area="Identity" asp-page="/Account/Login">Zaloguj się, aby dodać do koszyka</a>
                     }
                 </div>
             </div>
