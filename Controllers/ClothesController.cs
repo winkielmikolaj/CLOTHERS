@@ -15,8 +15,8 @@ namespace Clothers.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
-        private readonly long _maxImageSize = 2 * 1024 * 1024; // 2 MB
-        private readonly string[] _permittedExtensions = { ".jpg", ".jpeg", ".png", ".gif" };
+        //private readonly long _maxImageSize = 2 * 1024 * 1024; // 2 MB
+        //private readonly string[] _permittedExtensions = { ".jpg", ".jpeg", ".png", ".gif" };
 
         public ClothesController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
         {
@@ -29,6 +29,13 @@ namespace Clothers.Controllers
         {
             // Przekazanie searchString do widoku za pomocą ViewBag
             ViewBag.CurrentFilter = searchString;
+
+            //walidacja do 50 znakow
+            if (!string.IsNullOrEmpty(searchString) && searchString.Length > 50)
+            {
+                TempData["ErrorMessage"] = "Wyszukiwanie może zawierać maksymalnie 50 znaków.";
+                searchString = searchString.Substring(0, 50);
+            }
 
             var products = _context.Products
                 .Where(p => p.IsApproved && p.Quantity > 0);
@@ -69,18 +76,18 @@ namespace Clothers.Controllers
                 {
 
                     //walidacja zdjecia
-                    var extension = Path.GetExtension(Image.FileName).ToLower();
-                    if (!_permittedExtensions.Contains(extension))
-                    {
-                        ModelState.AddModelError("Image", "Nieobsługiwany format pliku obrazka.");
-                        return View(productVm);
-                    }
+                    //var extension = Path.GetExtension(Image.FileName).ToLower();
+                    //if (!_permittedExtensions.Contains(extension))
+                    //{
+                    //    ModelState.AddModelError("Image", "Nieobsługiwany format pliku obrazka.");
+                    //    return View(productVm);
+                    //}
 
-                    if (Image.Length > _maxImageSize)
-                    {
-                        ModelState.AddModelError("Image", "Rozmiar pliku obrazka przekracza 2 MB.");
-                        return View(productVm);
-                    }
+                    //if (Image.Length > _maxImageSize)
+                    //{
+                    //    ModelState.AddModelError("Image", "Rozmiar pliku obrazka przekracza 2 MB.");
+                    //    return View(productVm);
+                    //}
 
                     using (var memoryStream = new MemoryStream())
                     {
@@ -156,18 +163,18 @@ namespace Clothers.Controllers
                 if (Image != null && Image.Length > 0)
                 {
                     //walidacja zdjecia
-                    var extension = Path.GetExtension(Image.FileName).ToLower();
-                    if (!_permittedExtensions.Contains(extension))
-                    {
-                        ModelState.AddModelError("Image", "Nieobsługiwany format pliku obrazka.");
-                        return View(productVm);
-                    }
+                    //var extension = Path.GetExtension(Image.FileName).ToLower();
+                    //if (!_permittedExtensions.Contains(extension))
+                    //{
+                    //    ModelState.AddModelError("Image", "Nieobsługiwany format pliku obrazka.");
+                    //    return View(productVm);
+                    //}
 
-                    if (Image.Length > _maxImageSize)
-                    {
-                        ModelState.AddModelError("Image", "Rozmiar pliku obrazka przekracza 2 MB.");
-                        return View(productVm);
-                    }
+                    //if (Image.Length > _maxImageSize)
+                    //{
+                    //    ModelState.AddModelError("Image", "Rozmiar pliku obrazka przekracza 2 MB.");
+                    //    return View(productVm);
+                    //}
 
 
                     using (var memoryStream = new MemoryStream())

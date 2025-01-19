@@ -36,7 +36,6 @@ namespace Clothers.ViewModels
         [Display(Name = "Ilość")]
         public int Quantity { get; set; }
 
-        [Required(ErrorMessage = "Zdjęcie jest wymagane")]
         [Display(Name = "Zdjęcie")]
         public byte[]? Image { get; set; }
     }

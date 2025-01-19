@@ -36,11 +36,6 @@ namespace Clothers.Controllers
                 .Where(p => p.UserId == userId)
                 .ToListAsync();
 
-            if (userOffers == null || !userOffers.Any())
-            {
-                return View("NoOffers");
-            }
-
             return View(userOffers);
         }
 
