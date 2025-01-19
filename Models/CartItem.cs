@@ -19,6 +19,9 @@ namespace Clothers.Models
         [ForeignKey(nameof(ProductId))]
         public Product Product { get; set; }
 
+
+        [Range(1, int.MaxValue, ErrorMessage = "Ilość musi być przynajmniej 1.")]
+        [Display(Name = "Ilość")]
         public int Quantity { get; set; }
     }
 }

@@ -1,6 +1,4 @@
-﻿// Controllers/AdminController.cs
-
-using Clothers.Constants;
+﻿using Clothers.Constants;
 using Clothers.Data;
 using Clothers.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -8,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging; // Dodany namespace
+using Microsoft.Extensions.Logging;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -16,12 +14,13 @@ using System.Threading.Tasks;
 
 namespace Clothers.Controllers
 {
+    //autoryzacja akcji tylko dla admina
     [Authorize(Roles = Roles.Admin)]
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
-        private readonly ILogger<AdminController> _logger; // Zmieniono typ
+        private readonly ILogger<AdminController> _logger;
 
         public AdminController(ApplicationDbContext context, UserManager<IdentityUser> userManager, ILogger<AdminController> logger)
         {
@@ -100,6 +99,15 @@ namespace Clothers.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateUser(CreateUserViewModel model)
         {
+
+            //nowa walidacja sprawdzajaca przed dodaniem czy taki email juz istnieje
+            var existingUser = await _userManager.FindByEmailAsync(model.Email);
+            if (existingUser != null)
+            {
+                ModelState.AddModelError(string.Empty, "Użytkownik o podanym adresie e-mail już istnieje.");
+                return PartialView("_CreateUserPartial", model);
+            }
+
             if (ModelState.IsValid)
             {
                 var user = new IdentityUser { UserName = model.Email, Email = model.Email };
@@ -152,6 +160,13 @@ namespace Clothers.Controllers
                     return NotFound("Nie znaleziono użytkownika.");
                 }
 
+                var existingUser = await _userManager.FindByEmailAsync(model.Email);
+                if (existingUser != null && existingUser.Id != model.Id)
+                {
+                    ModelState.AddModelError(string.Empty, "Podany adres e-mail jest już używany przez innego użytkownika.");
+                    return PartialView("_EditUserPartial", model);
+                }
+
                 user.Email = model.Email;
                 user.UserName = model.Email;
 
@@ -195,6 +210,8 @@ namespace Clothers.Controllers
         [DataType(DataType.Password)]
         public string Password { get; set; }
 
+        [Required]
+        [Display(Name = "Rola")]
         public string Role { get; set; }
     }
 
@@ -206,15 +223,16 @@ namespace Clothers.Controllers
         [EmailAddress]
         public string Email { get; set; }
 
-        // Lista ról przypisanych do użytkownika
+        //lista rol przypisanych do uzytkownika
+        [Display(Name = "Role")]
         public IList<string> Roles { get; set; }
 
-        // Lista dostępnych ról do wyboru
+        //lista dostępnych ról do wyboru
         public List<SelectListItem> AvailableRoles { get; set; } = new List<SelectListItem>
         {
             new SelectListItem { Text = "Admin", Value = "Admin" },
-            new SelectListItem { Text = "SiteUser", Value = "SiteUser" },
-            new SelectListItem { Text = "Company", Value = "Company" }
+            new SelectListItem { Text = "UżytkownikStrony", Value = "SiteUser" },
+            new SelectListItem { Text = "Firma", Value = "Company" }
         };
     }
 }

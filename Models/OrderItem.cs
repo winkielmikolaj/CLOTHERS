@@ -21,9 +21,11 @@ namespace Clothers.Models
         public Product Product { get; set; }
 
         [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Ilość musi być przynajmniej 1.")]
         public int Quantity { get; set; }
 
         [Required]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Cena jednostkowa musi być większa od 0.")]
         [Precision(18, 2)]
         public decimal UnitPrice { get; set; }
 

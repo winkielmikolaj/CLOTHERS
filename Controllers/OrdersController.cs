@@ -27,7 +27,6 @@ namespace Clothers.Controllers
             _pdfGenerator = pdfGenerator;
         }
 
-        // GET: Orders/Create
         public async Task<IActionResult> Create()
         {
             _logger.LogInformation("Wywołano akcję GET Create w OrdersController.");
@@ -48,7 +47,6 @@ namespace Clothers.Controllers
             return View(viewModel);
         }
 
-        // POST: Orders/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(OrderViewModel model)
@@ -128,7 +126,6 @@ namespace Clothers.Controllers
             return View(model);
         }
 
-        // GET: Orders/Confirmation
         public async Task<IActionResult> Confirmation(int orderId)
         {
             var order = await _context.Orders
@@ -144,7 +141,6 @@ namespace Clothers.Controllers
             return View(order);
         }
 
-        // GET: Orders/MyOrders
         [Authorize(Roles = Roles.Company)]
         public async Task<IActionResult> MyOrders()
         {

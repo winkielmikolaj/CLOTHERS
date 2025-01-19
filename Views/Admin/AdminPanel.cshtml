@@ -40,7 +40,6 @@ else
                     <p><strong>Rozmiar:</strong> @product.Sizes</p>
                     <p><strong>Dodał:</strong> @product.User.Email</p>
                     <div class="product-actions">
-                        <a class="btn btn-secondary" asp-action="Details" asp-controller="Clothes" asp-route-id="@product.Id">Szczegóły</a>
                         <a class="btn btn-warning" asp-action="Edit" asp-controller="Clothes" asp-route-id="@product.Id">Edytuj</a>
                         <a class="btn btn-danger" asp-action="Delete" asp-controller="Clothes" asp-route-id="@product.Id">Usuń</a>
                         @if (!product.IsApproved)
@@ -102,7 +101,6 @@ else
     </table>
 }
 
-<!-- Modal Dodawania Użytkownika -->
 <div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="createUserModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -123,12 +121,10 @@ else
     </div>
 </div>
 
-<!-- Modal Edytowania Użytkownika -->
 <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div id="editUserContent">
-                <!-- Zawartość edycji użytkownika ładowana będzie dynamicznie -->
             </div>
         </div>
     </div>

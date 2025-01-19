@@ -40,7 +40,6 @@ else
                     <p><strong>Ilość:</strong> @product.Quantity</p>
                     <p><strong>Rozmiar:</strong> @product.Sizes</p>
                     <div class="product-actions">
-                        <a class="btn btn-secondary" asp-action="Details" asp-controller="Clothes" asp-route-id="@product.Id">Szczegóły</a>
                         <a class="btn btn-warning" asp-action="Edit" asp-controller="Clothes" asp-route-id="@product.Id">Edytuj</a>
                         <a class="btn btn-danger" asp-action="Delete" asp-controller="Clothes" asp-route-id="@product.Id">Usuń</a>
                     </div>

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Clothers.Controllers
 {
-    [Authorize(Roles = Roles.Company)]
+    [Authorize(Roles = Roles.Company + "," + Roles.Admin)]
     public class CompanyController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -27,9 +27,19 @@ namespace Clothers.Controllers
         {
             var userId = _userManager.GetUserId(User);
 
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
             var userOffers = await _context.Products
                 .Where(p => p.UserId == userId)
                 .ToListAsync();
+
+            if (userOffers == null || !userOffers.Any())
+            {
+                return View("NoOffers");
+            }
 
             return View(userOffers);
         }
@@ -37,11 +47,22 @@ namespace Clothers.Controllers
         public async Task<IActionResult> MyOrders()
         {
             var userId = _userManager.GetUserId(User);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
             var orders = await _context.Orders
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.Product)
                 .Where(o => o.OrderItems.Any(oi => oi.Product.UserId == userId))
                 .ToListAsync();
+
+            if (orders == null || !orders.Any())
+            {
+                return View("NoOrders");
+            }
 
             return View(orders);
         }

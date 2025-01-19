@@ -1,4 +1,5 @@
-﻿using Clothers.Data;
+﻿using Clothers.Constants;
+using Clothers.Data;
 using Clothers.Models;
 using Clothers.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -14,12 +15,15 @@ namespace Clothers.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly long _maxImageSize = 2 * 1024 * 1024; // 2 MB
+        private readonly string[] _permittedExtensions = { ".jpg", ".jpeg", ".png", ".gif" };
 
         public ClothesController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
             _userManager = userManager;
         }
+
 
         public async Task<IActionResult> Index(string searchString)
         {
@@ -38,22 +42,13 @@ namespace Clothers.Controllers
             return View(approvedProducts);
         }
 
-        public async Task<IActionResult> Details(int id)
-        {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
-            {
-                return NotFound("Nie znaleziono takiego produktu!");
-            }
-            return View(product);
-        }
-
         public IActionResult Create()
         {
             return View();
         }
 
         [HttpPost]
+        [Authorize(Roles = Roles.Company + "," + Roles.Admin)]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ProductsViewModel productVm, IFormFile Image)
         {
@@ -72,6 +67,21 @@ namespace Clothers.Controllers
 
                 if (Image != null && Image.Length > 0)
                 {
+
+                    //walidacja zdjecia
+                    var extension = Path.GetExtension(Image.FileName).ToLower();
+                    if (!_permittedExtensions.Contains(extension))
+                    {
+                        ModelState.AddModelError("Image", "Nieobsługiwany format pliku obrazka.");
+                        return View(productVm);
+                    }
+
+                    if (Image.Length > _maxImageSize)
+                    {
+                        ModelState.AddModelError("Image", "Rozmiar pliku obrazka przekracza 2 MB.");
+                        return View(productVm);
+                    }
+
                     using (var memoryStream = new MemoryStream())
                     {
                         await Image.CopyToAsync(memoryStream);
@@ -92,6 +102,7 @@ namespace Clothers.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = Roles.Company + "," + Roles.Admin)]
         public async Task<IActionResult> Edit(int id)
         {
             var product = await _context.Products.FindAsync(id);
@@ -116,6 +127,7 @@ namespace Clothers.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = Roles.Company + "," + Roles.Admin)]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, ProductsViewModel productVm, IFormFile Image)
         {
@@ -132,6 +144,8 @@ namespace Clothers.Controllers
 
             if (ModelState.IsValid)
             {
+
+
                 product.Name = productVm.Name;
                 product.Description = productVm.Description;
                 product.Price = productVm.Price;
@@ -141,6 +155,21 @@ namespace Clothers.Controllers
                 //logiak dodawania zdjecia
                 if (Image != null && Image.Length > 0)
                 {
+                    //walidacja zdjecia
+                    var extension = Path.GetExtension(Image.FileName).ToLower();
+                    if (!_permittedExtensions.Contains(extension))
+                    {
+                        ModelState.AddModelError("Image", "Nieobsługiwany format pliku obrazka.");
+                        return View(productVm);
+                    }
+
+                    if (Image.Length > _maxImageSize)
+                    {
+                        ModelState.AddModelError("Image", "Rozmiar pliku obrazka przekracza 2 MB.");
+                        return View(productVm);
+                    }
+
+
                     using (var memoryStream = new MemoryStream())
                     {
                         await Image.CopyToAsync(memoryStream);
@@ -164,6 +193,7 @@ namespace Clothers.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = Roles.Company + "," + Roles.Admin)]
         public async Task<IActionResult> Delete(int id)
         {
             var product = await _context.Products.FindAsync(id);
@@ -177,6 +207,7 @@ namespace Clothers.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = Roles.Company + "," + Roles.Admin)]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id, int quantityToRemove)
         {
@@ -262,13 +293,25 @@ namespace Clothers.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            //walidacja ilosci, ktora zostanie dodana do koszyka
+            if (quantity <= 0)
+            {
+                TempData["ErrorMessage"] = "Ilość musi być większa niż zero.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (product.Quantity < quantity)
+            {
+                TempData["ErrorMessage"] = "Żądana ilość przekracza dostępny stan magazynowy.";
+                return RedirectToAction(nameof(Index));
+            }
+
             var userId = _userManager.GetUserId(User);
             if (userId == null)
             {
                 return RedirectToAction("Login", "Account");
             }
 
-            //zczytywanie z bazy koszyk uzytkownika
             var cart = await _context.Carts
                 .Include(c => c.Items)
                 .FirstOrDefaultAsync(c => c.UserId == userId);
@@ -283,7 +326,6 @@ namespace Clothers.Controllers
                 _context.Carts.Add(cart);
             }
 
-            //checking czy produkt jest w koszu
             var cartItem = cart.Items.FirstOrDefault(ci => ci.ProductId == id);
             if (cartItem != null)
             {
