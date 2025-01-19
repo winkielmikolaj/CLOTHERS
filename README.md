@@ -1,44 +1,44 @@
-DOKUMENT TECHNICZNY PROJEKTU                                                                                                      Programowanie zaawansowane - P.P³aczek - 2024/2025 ST
+#DOKUMENT TECHNICZNY PROJEKTU                                                                                                      Programowanie zaawansowane - P.PÅ‚aczek - 2024/2025 ST
 
-1.	Tytu³ projektu: „Clothers”
+1.	TytuÅ‚ projektu: â€Clothersâ€
 
 2.	Tematyka projektu
-Projekt polega na stworzeniu internetowego sklepu odzie¿owego, który umo¿liwia u¿ytkownikom przegl¹danie produktów, dodawanie ich do koszyka oraz sk³adanie zamówieñ. W aplikacji bêdzie system logowania i rejestracji, a tak¿e wbudowany podgl¹d administratora. Planowana jest równie¿ funkcja potwierdzania rejestracji oraz z³o¿enia zamówienia poprzez skrzynkê mailow¹.
+Projekt polega na stworzeniu internetowego sklepu odzieÅ¼owego, ktÃ³ry umoÅ¼liwia uÅ¼ytkownikom przeglÄ…danie produktÃ³w, dodawanie ich do koszyka oraz skÅ‚adanie zamÃ³wieÅ„. W aplikacji bÄ™dzie system logowania i rejestracji, a takÅ¼e wbudowany podglÄ…d administratora. Planowana jest rÃ³wnieÅ¼ funkcja potwierdzania rejestracji oraz zÅ‚oÅ¼enia zamÃ³wienia poprzez skrzynkÄ™ mailowÄ….
 
 3.	Autorzy projektu:
-Miko³aj Winkiel
-Wojciech Struga³a
-Powy¿sze elementy s¹ konieczne na wstêpnym etapie dokumentacji. W wersji ostatecznej ponadto musz¹ siê znajdowaæ:
+MikoÅ‚aj Winkiel
+Wojciech StrugaÅ‚a
+PowyÅ¼sze elementy sÄ… konieczne na wstÄ™pnym etapie dokumentacji. W wersji ostatecznej ponadto muszÄ… siÄ™ znajdowaÄ‡:
 specyfikacja wykorzystanych technologii (np. wersja .NET, baza danych itd.)
 o	Microsoft SQL Server 2022
 o	.NET 8
 o	wersja visual studio 2022?
-instrukcje pierwszego uruchomienia projektu (np. koniecznoœæ wykonania polecenia Update-Database);
+instrukcje pierwszego uruchomienia projektu (np. koniecznoÅ›Ä‡ wykonania polecenia Update-Database);
 o	postawienie bazy danych
 o	update-database
 opis struktury projektu;
-…
-…
+â€¦
+â€¦
 
 
-wylistowane wszystkie modele, do ka¿dego z nich krótki opis, po co dany model jest, wszystkie pola w modelach wraz z opisem (w tym ograniczeniami nadanymi w ramach walidacji);
+wylistowane wszystkie modele, do kaÅ¼dego z nich krÃ³tki opis, po co dany model jest, wszystkie pola w modelach wraz z opisem (w tym ograniczeniami nadanymi w ramach walidacji);
 Model:
-Opis pól:
+Opis pÃ³l:
 Ograniczenia:
 Po co jest?:
 
-wylistowane kontrolery wraz z metodami: metoda musi byæ opisana swoj¹ nazw¹, dopuszczalnymi metodami HTTP (GET, POST, itd.), przyjmowanymi parametrami, opisem dzia³ania i zwracanymi danymi; w przypadku standardowych i oczywistych metod (np. wyœwietlenie widoku bez przekazywania parametrów) opis mo¿e byæ skrócony;
+wylistowane kontrolery wraz z metodami: metoda musi byÄ‡ opisana swojÄ… nazwÄ…, dopuszczalnymi metodami HTTP (GET, POST, itd.), przyjmowanymi parametrami, opisem dziaÅ‚ania i zwracanymi danymi; w przypadku standardowych i oczywistych metod (np. wyÅ›wietlenie widoku bez przekazywania parametrÃ³w) opis moÅ¼e byÄ‡ skrÃ³cony;
 Kontroler:
-Metody kontrolera z opisami szczegó³owymi:
-Opis kontrolerów i ich metod mo¿na rozszerzyæ o screeny prezentuj¹ce odpowiednie widoki i ich dzia³anie.
+Metody kontrolera z opisami szczegÃ³Å‚owymi:
+Opis kontrolerÃ³w i ich metod moÅ¼na rozszerzyÄ‡ o screeny prezentujÄ…ce odpowiednie widoki i ich dziaÅ‚anie.
 
-opis systemu u¿ytkowników: czy i jakie role w systemie funkcjonuj¹ oraz jak nadaæ rolê u¿ytkownikowi, jakie mo¿liwoœci maj¹ u¿ytkownicy zalogowani w odró¿nieniu od goœci, jakie informacje s¹ powi¹zane z konkretnym u¿ytkownikiem, a jakie s¹ globalne;
-Dostêpne role:
-Nazwa roli – jak stworzyæ - uprawnienia – powi¹zania
-Nazwa roli – jak stworzyæ - uprawnienia - powi¹zania
+opis systemu uÅ¼ytkownikÃ³w: czy i jakie role w systemie funkcjonujÄ… oraz jak nadaÄ‡ rolÄ™ uÅ¼ytkownikowi, jakie moÅ¼liwoÅ›ci majÄ… uÅ¼ytkownicy zalogowani w odrÃ³Å¼nieniu od goÅ›ci, jakie informacje sÄ… powiÄ…zane z konkretnym uÅ¼ytkownikiem, a jakie sÄ… globalne;
+DostÄ™pne role:
+Nazwa roli â€“ jak stworzyÄ‡ - uprawnienia â€“ powiÄ…zania
+Nazwa roli â€“ jak stworzyÄ‡ - uprawnienia - powiÄ…zania
 
 
-krótka charakterystyka najciekawszych funkcjonalnoœci (CRUD to nie ciekawe funkcjonalnoœci...).
-wyszukiwanie mo¿na daæ
-fakturkê mo¿na daæ – opisaæ ¿eby siê nie pogubily dzieci
+krÃ³tka charakterystyka najciekawszych funkcjonalnoÅ›ci (CRUD to nie ciekawe funkcjonalnoÅ›ci...).
+wyszukiwanie moÅ¼na daÄ‡
+fakturkÄ™ moÅ¼na daÄ‡ â€“ opisaÄ‡ Å¼eby siÄ™ nie pogubily dzieci
 
