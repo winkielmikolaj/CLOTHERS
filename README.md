@@ -2,7 +2,7 @@
 
 ## Opis projektu
 
-Clothers to aplikacja internetowy sklep z ubraniami. Aplikacja jest zbudowana przy użyciu technologii - ASP.NET Core MVC oraz Entity Framework Core.
+Clothers to internetowy sklep z ubraniami. Aplikacja jest zbudowana przy użyciu technologii - ASP.NET Core MVC oraz Entity Framework Core.
 
 ## Funkcjonalności
 
